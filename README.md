@@ -34,25 +34,6 @@ Conectar empresas que possuem produtos próximos do vencimento com outras que po
 
 ---
 
-## 📊 Estrutura do Projeto
-
-backend/
-│
-├── src/
-│ ├── server.js
-│ ├── prisma.js
-│ └── middlewares/
-│ └── auth.js
-│
-├── prisma/
-│ └── schema.prisma
-│
-├── .env
-├── package.json
-
-
----
-
 ## 🔗 Endpoints principais
 
 ### 🔐 Autenticação
