@@ -4,6 +4,9 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const authMiddleware = require('./middlewares/auth')
 require('dotenv').config()
+const multer = require('multer')
+const XLSX = require('xlsx')
+const upload = multer({ dest: 'uploads/' })
 
 console.log('🔄 Iniciando servidor...')
 
@@ -213,6 +216,51 @@ app.post('/empresas/login', async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).json({ erro: error.message })
+  }
+})
+
+app.post('/produtos/upload', authMiddleware, upload.single('file'), async (req, res) => {
+  try {
+    const file = req.file
+
+    if (!file) {
+      return res.status(400).json({ erro: 'Arquivo não enviado' })
+    }
+
+    const workbook = XLSX.readFile(file.path)
+    const sheetName = workbook.SheetNames[0]
+    const sheet = workbook.Sheets[sheetName]
+
+    const dados = XLSX.utils.sheet_to_json(sheet)
+
+    if (!dados.length) {
+      return res.status(400).json({ erro: 'A planilha está vazia' })
+    }
+
+    const empresaId = req.empresa.id
+
+    const produtos = dados.map((item) => ({
+      nomeTecnico: item.nomeTecnico,
+      marca: item.marca,
+      lote: item.lote,
+      validade: new Date(item.validade),
+      quantidade: item.quantidade,
+      cidade: item.cidade,
+      preco: item.preco,
+      empresaId
+    }))
+
+    await prisma.produto.createMany({
+      data: produtos
+    })
+
+    return res.status(201).json({
+      mensagem: 'Produtos importados com sucesso',
+      total: produtos.length
+    })
+  } catch (error) {
+    console.error('❌ Erro no upload:', error)
+    return res.status(500).json({ erro: error.message })
   }
 })
 
