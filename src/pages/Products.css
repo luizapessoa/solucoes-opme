@@ -1,0 +1,175 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.products-page {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-box {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  font-weight: bold;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.dashboard-nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nav-button {
+  border: none;
+  background: transparent;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #334155;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-button.active {
+  background-color: #e8f0ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.products-header {
+  padding: 32px 32px 24px;
+}
+
+.products-header h1 {
+  font-size: 40px;
+  margin: 0 0 8px;
+  color: #0f172a;
+}
+
+.products-header p {
+  margin: 0;
+  font-size: 18px;
+  color: #64748b;
+}
+
+.products-table-wrapper {
+  margin: 0 32px 32px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 24px;
+  overflow-x: auto;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.products-table thead tr {
+  background-color: #f8fafc;
+}
+
+.products-table th,
+.products-table td {
+  text-align: left;
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 15px;
+}
+
+.products-table th {
+  color: #334155;
+  font-weight: 700;
+}
+
+.products-table td {
+  color: #475569;
+}
+
+.products-message {
+  text-align: center;
+  font-size: 18px;
+  color: #64748b;
+  padding: 40px 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.normal {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge.atenção {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.urgente {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    padding: 20px;
+  }
+
+  .products-header {
+    padding: 24px 20px 20px;
+  }
+
+  .products-table-wrapper {
+    margin: 0 20px 20px;
+  }
+
+  .products-header h1 {
+    font-size: 32px;
+  }
+}
