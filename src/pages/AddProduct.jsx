@@ -1,179 +1,74 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api } from '../services/api'
-import './AddProduct.css'
+import { api, erroDaApi } from '../services/api'
+
+const VAZIO = { nomeTecnico: '', marca: '', lote: '', validade: '', quantidade: '', cidade: '', preco: '' }
+const ROTULOS = { nomeTecnico: 'Nome técnico', marca: 'Marca', lote: 'Lote', validade: 'Validade', quantidade: 'Quantidade', cidade: 'Cidade', preco: 'Preço' }
 
 export default function AddProduct() {
-  const [formData, setFormData] = useState({
-    nomeTecnico: '',
-    marca: '',
-    lote: '',
-    validade: '',
-    quantidade: '',
-    cidade: '',
-    preco: ''
-  })
-
-  const [mensagem, setMensagem] = useState('')
+  const [form, setForm] = useState(VAZIO)
+  const [ok, setOk] = useState(false)
   const [erro, setErro] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleChange(event) {
-    const { name, value } = event.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }))
+  function handleChange(e) {
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
+    setOk(false)
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault()
-    setMensagem('')
-    setErro('')
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setOk(false)
+    const faltando = Object.keys(ROTULOS).find((k) => String(form[k]).trim() === '')
+    if (faltando) return setErro(`${ROTULOS[faltando]} é obrigatório.`)
+    const quantidade = parseInt(form.quantidade, 10)
+    const preco = parseFloat(form.preco)
+    if (!(quantidade >= 0) || !(preco >= 0)) return setErro('Quantidade e preço precisam ser números positivos.')
 
+    setErro('')
+    setLoading(true)
     try {
       await api.post('/produtos', {
-        ...formData,
-        quantidade: Number(formData.quantidade),
-        preco: Number(formData.preco)
+        ...form,
+        nomeTecnico: form.nomeTecnico.trim(), marca: form.marca.trim(),
+        lote: form.lote.trim(), cidade: form.cidade.trim(), quantidade, preco
       })
-
-      setMensagem('Produto cadastrado com sucesso!')
-      setFormData({
-        nomeTecnico: '',
-        marca: '',
-        lote: '',
-        validade: '',
-        quantidade: '',
-        cidade: '',
-        preco: ''
-      })
+      setForm(VAZIO)
+      setOk(true)
     } catch (error) {
-      console.error(error)
-      setErro(error.response?.data?.erro || 'Erro ao cadastrar produto')
+      setErro(erroDaApi(error, 'Erro ao cadastrar produto'))
+    } finally {
+      setLoading(false)
     }
   }
 
-  return (
-    <div className="add-product-page">
-      <header className="topbar">
-        <div className="logo-area">
-          <div className="logo-box">◻</div>
-          <span className="logo-text">OPME Manager</span>
-        </div>
-
-        <nav className="dashboard-nav">
-          <Link to="/" className="nav-button">
-            Dashboard
-          </Link>
-
-          <Link to="/produtos" className="nav-button">
-            Produtos
-          </Link>
-
-          <Link to="/produtos/novo" className="nav-button active">
-            Adicionar
-          </Link>
-
-          <Link to="/produtos/upload" className="nav-button">
-            Importar
-          </Link>
-        </nav>
-      </header>
-
-      <section className="add-product-header">
-        <h1>Adicionar Produto</h1>
-        <p>Cadastre manualmente um novo produto no sistema</p>
-      </section>
-
-      <section className="form-wrapper">
-        <form className="product-form" onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Nome Técnico</label>
-              <input
-                type="text"
-                name="nomeTecnico"
-                value={formData.nomeTecnico}
-                onChange={handleChange}
-                placeholder="Digite o nome técnico"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Marca</label>
-              <input
-                type="text"
-                name="marca"
-                value={formData.marca}
-                onChange={handleChange}
-                placeholder="Digite a marca"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Lote</label>
-              <input
-                type="text"
-                name="lote"
-                value={formData.lote}
-                onChange={handleChange}
-                placeholder="Digite o lote"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Validade</label>
-              <input
-                type="date"
-                name="validade"
-                value={formData.validade}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Quantidade</label>
-              <input
-                type="number"
-                name="quantidade"
-                value={formData.quantidade}
-                onChange={handleChange}
-                placeholder="Digite a quantidade"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Cidade</label>
-              <input
-                type="text"
-                name="cidade"
-                value={formData.cidade}
-                onChange={handleChange}
-                placeholder="Digite a cidade"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Preço</label>
-              <input
-                type="number"
-                step="0.01"
-                name="preco"
-                value={formData.preco}
-                onChange={handleChange}
-                placeholder="Digite o preço"
-              />
-            </div>
-          </div>
-
-          {mensagem && <p className="success-message">{mensagem}</p>}
-          {erro && <p className="error-message">{erro}</p>}
-
-          <button type="submit" className="submit-button">
-            Salvar Produto
-          </button>
-        </form>
-      </section>
+  const campo = (name, rotulo, props = {}) => (
+    <div className="field">
+      <label htmlFor={name}>{rotulo}</label>
+      <input id={name} name={name} value={form[name]} onChange={handleChange} {...props} />
     </div>
+  )
+
+  return (
+    <>
+      <div className="head"><div><h1>Novo produto</h1><p className="muted">Todos os campos são obrigatórios.</p></div></div>
+      <form className="card form" onSubmit={handleSubmit} noValidate>
+        {ok && <p className="msg ok" role="status">Produto salvo. <Link to="/produtos">Ver produtos</Link></p>}
+        {erro && <p className="msg erro" role="alert">{erro}</p>}
+        {campo('nomeTecnico', 'Nome técnico', { placeholder: 'Ex.: Parafuso Ortopédico' })}
+        <div className="g2">
+          {campo('marca', 'Marca')}
+          {campo('lote', 'Lote')}
+          {campo('validade', 'Validade', { type: 'date' })}
+          {campo('quantidade', 'Quantidade', { type: 'number', min: 0, step: 1 })}
+          {campo('cidade', 'Cidade')}
+          {campo('preco', 'Preço (R$)', { type: 'number', min: 0, step: '0.01' })}
+        </div>
+        <div className="foot">
+          <Link className="btn ghost" to="/produtos">Cancelar</Link>
+          <button className="btn primary" disabled={loading}>{loading ? 'Salvando…' : 'Salvar produto'}</button>
+        </div>
+      </form>
+    </>
   )
 }
